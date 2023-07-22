@@ -1,3 +1,4 @@
+
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
@@ -25,28 +26,25 @@ contract DegenToken is ERC20, Ownable, ERC20Burnable {
             require(balanceOf(msg.sender)>= amount, "You do not have enough Tokens");
             _burn(msg.sender, amount);
         }
-        function RedemptionItems() public pure returns(string memory) {
-            return "1. SuperPlayer NFT value = 350 \n 2. CaptainKing value = 150 /n 3. DGNStar value = 75";
+        function GameStore() public pure returns(string memory) {
+            return "1. Marvel NFT value = 250 \n 2. HulkGamer value = 200 /n 3. GameLegend value = 100";
         }
-        function reedemTokens(uint Item_id) external payable{
-            require(Item_id<=3,"Invalid selection");
-            if(Item_id ==1){
+        function TokenRedemption(uint Item_Id) external payable{
+            require(Item_Id<=3,"Invalid selection");
+            if(Item_Id ==1){
+                require(balanceOf(msg.sender)>=250, "Insufficient Balance");
+                approve(msg.sender, 250);
+                _burn(msg.sender, 250);
+            }
+            else if(Item_Id ==2){
                 require(balanceOf(msg.sender)>=200, "Insufficient Balance");
                 approve(msg.sender, 200);
-                transferFrom(msg.sender, owner(), 200);
-            }
-            else if(Item_id ==2){
-                require(balanceOf(msg.sender)>=100, "Insufficient Balance");
-                approve(msg.sender, 100);
-                transferFrom(msg.sender, owner(), 100);
+                _burn(msg.sender, 200);
             }
             else{
-                require(balanceOf(msg.sender)>=75, "Insufficient Balance");
-                approve(msg.sender, 75);
-                transferFrom(msg.sender, owner(), 75);
+                require(balanceOf(msg.sender)>=100, "Insufficient Balance");
+                approve(msg.sender, 100);
+                _burn(msg.sender, 100);
             }
-
-
         }
-
 }
