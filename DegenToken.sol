@@ -8,6 +8,15 @@ import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import "hardhat/console.sol";
 
 contract DegenToken is ERC20, Ownable, ERC20Burnable {
+    struct Item {
+        uint256 value;
+        bool exists;
+    }
+    mapping(string => Item) public redeemItems;
+    mapping(address => uint256) public userBalances;
+
+    event ItemAdded(string itemName, uint256 itemValue, address addedBy);
+    event ItemRedeemed(string itemName, uint256 itemValue, address redeemedBy);
 
     constructor() ERC20("Degen", "DGN") {}
 
@@ -22,29 +31,31 @@ contract DegenToken is ERC20, Ownable, ERC20Burnable {
         function checkBalance() external view returns(uint){
            return balanceOf(msg.sender);
         }
+        
         function burnTokens(uint amount) external{
             require(balanceOf(msg.sender)>= amount, "You do not have enough Tokens");
             _burn(msg.sender, amount);
         }
-        function GameStore() public pure returns(string memory) {
-            return "1. Marvel NFT value = 250 \n 2. HulkGamer value = 200 /n 3. GameLegend value = 100";
+        function addItem(string memory itemName, uint256 itemValue) external onlyOwner {
+            require(!redeemItems[itemName].exists, "Item already exists");
+            redeemItems[itemName] = Item(itemValue, true);
+            emit ItemAdded(itemName, itemValue, msg.sender);
         }
-        function TokenRedemption(uint Item_Id) external payable{
-            require(Item_Id<=3,"Invalid selection");
-            if(Item_Id ==1){
-                require(balanceOf(msg.sender)>=250, "Insufficient Balance");
-                approve(msg.sender, 250);
-                _burn(msg.sender, 250);
-            }
-            else if(Item_Id ==2){
-                require(balanceOf(msg.sender)>=200, "Insufficient Balance");
-                approve(msg.sender, 200);
-                _burn(msg.sender, 200);
-            }
-            else{
-                require(balanceOf(msg.sender)>=100, "Insufficient Balance");
-                approve(msg.sender, 100);
-                _burn(msg.sender, 100);
-            }
+        function redeemItem(string memory itemName) external {
+            require(redeemItems[itemName].exists, "Item does not exist");
+            require(userBalances[msg.sender] >= redeemItems[itemName].value, "Insufficient balance");
+            
+            uint256 itemValue = redeemItems[itemName].value;
+            userBalances[msg.sender] -= itemValue;
+            
+            emit ItemRedeemed(itemName, itemValue, msg.sender);
         }
+        
+        function getBalance() external view returns (uint256) {
+            return userBalances[msg.sender];
+        }
+        function addToBalance(uint256 amount) external {
+            userBalances[msg.sender] += amount;
+        }
+        
 }
